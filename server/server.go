@@ -12,7 +12,7 @@ type Server struct {
 }
 
 func NewServer() Server {
-	return Server{NewHandler()}
+	return Server{}
 }
 
 func (s Server) Run() {

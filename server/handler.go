@@ -7,22 +7,13 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
-	"wizard/db"
 	"wizard/redis"
 	"wizard/repository"
 
 	"github.com/elliotchance/phpserialize"
 )
 
-type Handler struct {
-	blRepository repository.BlackListRepository
-	redis        redis.Redis
-}
-
-func NewHandler() Handler {
-	db := db.NewDB()
-	return Handler{repository.NewBlackListRepository(&db), redis.NewRedis()}
-}
+type Handler struct{}
 
 func (h Handler) report(w http.ResponseWriter, r *http.Request) {
 	req := Request{}
@@ -60,13 +51,13 @@ func (h Handler) getReport(phoneStorage PhoneStorage, excludedList ExcludedList)
 				part := 0
 				wg := sync.WaitGroup{}
 				for {
-					res, ok := h.redis.HGet(redisKey, strconv.Itoa(part))
+					source, ok := redis.Cli.HGet(redisKey, strconv.Itoa(part))
 					part++
 					if !ok {
 						break
 					}
 					wg.Add(1)
-					go h.processPhones(res, &excludedList, &report, &mutex, &wg)
+					go h.processPhones(source, &excludedList, &report, &mutex, &wg)
 				}
 				wg.Wait()
 			}
@@ -75,9 +66,9 @@ func (h Handler) getReport(phoneStorage PhoneStorage, excludedList ExcludedList)
 	return
 }
 
-func (h Handler) processPhones(res []byte, list *ExcludedList, report *Report, mut *sync.Mutex, wg *sync.WaitGroup) {
+func (h Handler) processPhones(source []byte, list *ExcludedList, report *Report, mut *sync.Mutex, wg *sync.WaitGroup) {
 	dto := SourceDto{}
-	err := phpserialize.Unmarshal(res, &dto)
+	err := phpserialize.Unmarshal(source, &dto)
 	if err != nil {
 		wg.Done()
 		fmt.Println(err)
@@ -108,7 +99,7 @@ func (h Handler) processPhones(res []byte, list *ExcludedList, report *Report, m
 }
 
 func (h Handler) getExcludedList(storage PhoneStorage) (list ExcludedList, err error) {
-	phones, err := h.blRepository.FindBlackListPhones()
+	phones, err := repository.BlackListRepository{}.FindBlackListPhones()
 	if err != nil {
 		return
 	}
@@ -118,9 +109,9 @@ func (h Handler) getExcludedList(storage PhoneStorage) (list ExcludedList, err e
 }
 
 func (h Handler) getPhoneStorage(key string) (storage PhoneStorage, err error) {
-	res, ok := h.redis.Get(key)
+	res, ok := redis.Cli.Get(key)
 	if !ok {
-		err = errors.New("Phonestorage not found")
+		err = errors.New("PhoneStorage not found")
 		return
 	}
 	err = phpserialize.Unmarshal(res, &storage)

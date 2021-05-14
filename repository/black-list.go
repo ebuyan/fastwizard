@@ -1,30 +1,32 @@
 package repository
 
-import "wizard/db"
+import (
+	"wizard/psql"
+)
 
-type BlackListRepository struct{ *db.DB }
+type BlackListRepository struct{}
 
 type Phones map[string]bool
 
-func NewBlackListRepository(db *db.DB) BlackListRepository {
-	return BlackListRepository{db}
-}
-
 func (r BlackListRepository) FindBlackListPhones() (phones Phones, err error) {
-	rows, err := r.Query(`
-	select phone
-	from global_black_lists
-	where (user_id = $1 and rs_id = 0) or  (user_id = 0 and rs_id = 0)
-	and phone::text not in (
-		select phone
-		from global_white_list
-		where (user_id = $1 and rs_id = 0) or  (user_id = 0 and rs_id = 0)
-	)
-	union
-	select phone::text
-	from phone_records
-	left join address_book on address_book.id = phone_records.book_id
-	where address_book.black_lst = 1 and address_book.user_id = $1
+	rows, err := psql.DB.Query(`
+		SELECT
+			phone :: BIGINT 
+		FROM
+			global_black_lists 
+		WHERE
+			( user_id = $1 AND rs_id = 0 ) 
+			OR ( user_id = 0 AND rs_id = 0 ) 
+			AND phone NOT IN ( SELECT phone FROM global_white_list WHERE ( user_id = $1 AND rs_id = 0 ) OR ( user_id = 0 AND rs_id = 0 ) )
+		UNION
+		SELECT
+			phone 
+		FROM
+			phone_records
+			LEFT JOIN address_book ON address_book.ID = phone_records.book_id 
+		WHERE
+			address_book.black_lst = 1 
+			AND address_book.user_id = $1
 	`, 2607)
 	if err != nil {
 		return

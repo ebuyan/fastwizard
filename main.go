@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"wizard/psql"
+	"wizard/redis"
 	"wizard/server"
 
 	"github.com/joho/godotenv"
@@ -9,6 +11,14 @@ import (
 
 func main() {
 	err := godotenv.Load()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = psql.InitDB()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = redis.InitRedis()
 	if err != nil {
 		log.Fatalln(err)
 	}
