@@ -3,7 +3,7 @@ package phonestore
 import (
 	"errors"
 	"fmt"
-	"wizard/redis"
+	"wizard/pkg/redis"
 
 	"github.com/elliotchance/phpserialize"
 )

@@ -1,4 +1,4 @@
-package psql
+package db
 
 import (
 	"database/sql"
@@ -9,7 +9,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var DB *sql.DB
+var Conn *sql.DB
 
 func InitDB() error {
 	host := os.Getenv("DB_HOST")
@@ -22,6 +22,6 @@ func InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	DB = db
+	Conn = db
 	return db.Ping()
 }

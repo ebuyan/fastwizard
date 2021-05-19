@@ -3,6 +3,7 @@ package phonestore
 import (
 	"strconv"
 	"sync"
+	"wizard/pkg/memory"
 )
 
 type PhoneReport struct {
@@ -32,12 +33,13 @@ func (p *PhoneReport) GetReport() (report Report) {
 					wg := sync.WaitGroup{}
 					for {
 						source, ok := p.storage.GetSource(sourceKey, strconv.Itoa(part))
+						memory.Usage()
 						part++
 						if !ok {
 							break
 						}
 						wg.Add(1)
-						go p.processPhones(source, &report, &wg)
+						go p.processPhones(&source, &report, &wg)
 					}
 					wg.Wait()
 				}
@@ -47,7 +49,7 @@ func (p *PhoneReport) GetReport() (report Report) {
 	return
 }
 
-func (p *PhoneReport) processPhones(source Source, report *Report, wg *sync.WaitGroup) {
+func (p *PhoneReport) processPhones(source *Source, report *Report, wg *sync.WaitGroup) {
 	p.Lock()
 	defer wg.Done()
 	defer p.Unlock()

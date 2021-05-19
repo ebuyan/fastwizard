@@ -27,3 +27,7 @@ func (r Client) HGet(key string, hash string) (res []byte, ok bool) {
 	ok = err == nil
 	return
 }
+
+func (r Client) Close() {
+	r.cli.Close()
+}

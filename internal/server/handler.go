@@ -2,38 +2,50 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
-	phonestore "wizard/phone_store"
-	"wizard/repository"
+	"wizard/internal/phonestore"
+	"wizard/internal/repository"
 )
 
 type Handler struct{}
 
-func (h Handler) report(w http.ResponseWriter, r *http.Request) {
+func (h Handler) report(w http.ResponseWriter, r *http.Request) (err error) {
 	req := ReportRequest{}
 	json.NewDecoder(r.Body).Decode(&req)
 	if len(req.Key) == 0 {
-		http.Error(w, "Empty key", http.StatusInternalServerError)
+		err = errors.New("Empty key")
 		return
 	}
 	phoneStorage, err := phonestore.NewPhoneStorage(req.Key)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	blackListPhones, err := repository.BlackListRepository{}.FindBlackListPhones()
+	blackListPhones, err := repository.FindBlackListPhones()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	report := phonestore.NewPhoneReport(phoneStorage, blackListPhones)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	js, _ := json.Marshal(report.GetReport())
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
+	report = nil
+	return
+}
+
+func (h Handler) test(w http.ResponseWriter, r *http.Request) (err error) {
+	phones, _ := repository.FindPhoneRecords()
+	for key, phone := range phones {
+		if key == 100 {
+			fmt.Println(phone)
+		}
+	}
+	phones = nil
+	return
 }
 
 type ReportRequest struct {
