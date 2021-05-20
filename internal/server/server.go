@@ -1,16 +1,14 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net/http"
+	"wizard/internal/handler"
 
 	"github.com/gorilla/mux"
 )
 
-type Server struct {
-	Handler
-}
+type Server struct{}
 
 func NewServer() Server {
 	return Server{}
@@ -18,18 +16,7 @@ func NewServer() Server {
 
 func (s Server) Run() {
 	r := mux.NewRouter()
-	r.HandleFunc("/report", s.handle(s.report)).Methods("POST")
-	r.HandleFunc("/test", s.handle(s.test)).Methods("GET")
+	r.HandleFunc("/report", Handle(handler.GetReport)).Methods("POST")
 	log.Println("Start server on: :8080")
 	log.Fatalln(http.ListenAndServe(":8080", r))
-}
-
-func (s Server) handle(f func(w http.ResponseWriter, r *http.Request) error) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		err := f(w, r)
-		if err != nil {
-			fmt.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	}
 }

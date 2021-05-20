@@ -1,3 +1,5 @@
+github.com/CAFxX/gcnotifier v0.0.0-20190112062741-224a280d589d h1:n0G4ckjMEj7bWuGYUX0i8YlBeBBJuZ+HEHvHfyBDZtI=
+github.com/CAFxX/gcnotifier v0.0.0-20190112062741-224a280d589d/go.mod h1:Rn2zM2MnHze07LwkneP48TWt6UiZhzQTwCvw6djVGfE=
 github.com/elliotchance/phpserialize v1.3.0 h1:yQ9t2spsOBp95V9qo4vPYIC2bXFaYOraRb8hpWd5E38=
 github.com/elliotchance/phpserialize v1.3.0/go.mod h1:gt7XX9+ETUcLXbtTKEuyrqW3lcLUAeS/AnGZ2e49TZs=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=

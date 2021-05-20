@@ -1,8 +1,6 @@
 package repository
 
-import (
-	"wizard/pkg/db"
-)
+import "database/sql"
 
 type PhoneRecords []PhoneRecord
 type PhoneRecord struct {
@@ -10,8 +8,8 @@ type PhoneRecord struct {
 	Field string
 }
 
-func FindPhoneRecords() (phones PhoneRecords, err error) {
-	rows, err := db.Conn.Query(`
+func FindPhoneRecords(db *sql.DB) (phones PhoneRecords, err error) {
+	rows, err := db.Query(`
 	SELECT
 		phone_records.phone,
 		field1 || ',' ||	field2 || ',' ||	field3 || ',' ||	field4 as field

@@ -7,19 +7,18 @@ import (
 )
 
 type PhoneReport struct {
-	*sync.Mutex
-	*Phones
-	storage *PhoneStorage
+	sync.Mutex
+	Phones
+	storage PhoneStorage
 }
 
 type Phones struct {
-	BlackList map[string]bool
-	Unique    map[string]bool
+	BlackList map[int]bool
+	Unique    map[int]bool
 }
 
-func NewPhoneReport(storage *PhoneStorage, blackListPhones map[string]bool) *PhoneReport {
-	phones := Phones{blackListPhones, make(map[string]bool)}
-	return &PhoneReport{&sync.Mutex{}, &phones, storage}
+func NewPhoneReport(storage PhoneStorage, blackListPhones map[int]bool) *PhoneReport {
+	return &PhoneReport{sync.Mutex{}, Phones{blackListPhones, make(map[int]bool)}, storage}
 }
 
 func (p *PhoneReport) GetReport() (report Report) {
@@ -39,25 +38,28 @@ func (p *PhoneReport) GetReport() (report Report) {
 							break
 						}
 						wg.Add(1)
-						go p.processPhones(&source, &report, &wg)
+						go p.processPhones(source, &report, &wg)
 					}
 					wg.Wait()
 				}
 			}
 		}
 	}
+	p.Phones.Unique = nil
+	p.Phones.BlackList = nil
 	return
 }
 
-func (p *PhoneReport) processPhones(source *Source, report *Report, wg *sync.WaitGroup) {
+func (p *PhoneReport) processPhones(source Source, report *Report, wg *sync.WaitGroup) {
 	p.Lock()
 	defer wg.Done()
 	defer p.Unlock()
 	for _, phones := range source.Phones {
-		arr := phones.([]interface{})
-		phone := arr[0].(string)
+		ph := phones.([]interface{})[0].(string)
+		phone, err := strconv.Atoi(ph)
+
 		report.All++
-		if len(phone) == 0 {
+		if err != nil || phone == 0 {
 			report.Bad++
 			continue
 		}

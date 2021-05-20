@@ -3,6 +3,7 @@ module wizard
 go 1.13
 
 require (
+	github.com/CAFxX/gcnotifier v0.0.0-20190112062741-224a280d589d // indirect
 	github.com/elliotchance/phpserialize v1.3.0
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/google/go-cmp v0.5.5 // indirect

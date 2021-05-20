@@ -3,6 +3,7 @@ package phonestore
 import (
 	"errors"
 	"fmt"
+	"log"
 	"wizard/pkg/redis"
 
 	"github.com/elliotchance/phpserialize"
@@ -10,40 +11,42 @@ import (
 
 type PhoneStorage struct {
 	Store
+	*redis.Client
 }
 
-func NewPhoneStorage(key string) (storage *PhoneStorage, err error) {
-	res, ok := redis.Cli.Get(key)
+func NewPhoneStorage(redis *redis.Client, key string) (storage PhoneStorage, err error) {
+	res, ok := redis.Get(key)
 	if !ok {
 		err = errors.New("PhoneStorage not found")
 		return
 	}
 	store := Store{}
 	err = phpserialize.Unmarshal(res, &store)
-	storage = &PhoneStorage{}
+	storage = PhoneStorage{}
 	storage.Store = store
+	storage.Client = redis
 	return
 }
 
-func (p *PhoneStorage) GetSource(sourceKey, sourcePart string) (source Source, ok bool) {
-	res, ok := redis.Cli.HGet(sourceKey, sourcePart)
+func (p PhoneStorage) GetSource(sourceKey, sourcePart string) (source Source, ok bool) {
+	res, ok := p.HGet(sourceKey, sourcePart)
 	if !ok {
 		return
 	}
 	err := phpserialize.Unmarshal(res, &source)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		ok = false
 		return
 	}
 	return
 }
 
-func (p *PhoneStorage) GetSourceKey(sourceType, sourceName string) string {
+func (p PhoneStorage) GetSourceKey(sourceType, sourceName string) string {
 	return fmt.Sprintf("%s:%s:%s", p.Key, sourceType, sourceName)
 }
 
-func (p *PhoneStorage) GetAll() (s Sources) {
+func (p PhoneStorage) GetAll() (s Sources) {
 	s = Sources{}
 	s["book"] = p.Book
 	s["file"] = p.File

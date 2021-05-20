@@ -1,13 +1,11 @@
 package repository
 
-import (
-	"wizard/pkg/db"
-)
+import "wizard/pkg/db"
 
-type Phones map[string]bool
+type Phones map[int]bool
 
-func FindBlackListPhones() (Phones, error) {
-	rows, err := db.Conn.Query(`
+func FindBlackListPhones(db *db.DB) (Phones, error) {
+	rows, err := db.Query(`
 	SELECT
 		gbl.phone :: BIGINT 
 	FROM
@@ -33,7 +31,7 @@ func FindBlackListPhones() (Phones, error) {
 	}
 	phones := Phones{}
 	for rows.Next() {
-		var phone string
+		var phone int
 		rows.Scan(&phone)
 		phones[phone] = true
 	}
