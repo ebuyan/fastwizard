@@ -12,7 +12,9 @@ type DB struct {
 	*sql.DB
 }
 
-func InitDB() (db *DB, err error) {
+var Conn *DB
+
+func InitDB() (err error) {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")
@@ -24,6 +26,6 @@ func InitDB() (db *DB, err error) {
 		return
 	}
 	err = Db.Ping()
-	db = &DB{Db}
+	Conn = &DB{Db}
 	return
 }

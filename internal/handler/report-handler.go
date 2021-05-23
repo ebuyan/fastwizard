@@ -5,6 +5,7 @@ import (
 	"wizard/internal/app"
 	"wizard/internal/phonestore"
 	"wizard/internal/repository"
+	"wizard/pkg/memory"
 )
 
 func GetReport(app app.App) (js []byte, err error) {
@@ -21,5 +22,6 @@ func GetReport(app app.App) (js []byte, err error) {
 		return
 	}
 	js, _ = json.Marshal(report.GetReport())
+	memory.Usage()
 	return
 }

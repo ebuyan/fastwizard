@@ -6,12 +6,14 @@ import (
 
 type Client struct{ cli *redis.Client }
 
-func InitRedis() (cli *Client, err error) {
+var Cli *Client
+
+func InitRedis() (err error) {
 	client := redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",
 	})
 	err = client.Ping().Err()
-	cli = &Client{client}
+	Cli = &Client{client}
 	return
 }
 

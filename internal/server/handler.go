@@ -16,9 +16,6 @@ func Handle(f func(app app.App) ([]byte, error)) http.HandlerFunc {
 			return
 		}
 
-		defer app.DB.Close()
-		defer app.Redis.Close()
-
 		result, err := f(app)
 
 		if err != nil {

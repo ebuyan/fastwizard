@@ -20,16 +20,9 @@ func NewApp(r *http.Request) (app App, err error) {
 		err = errors.New("Empty key")
 		return
 	}
-	db, err := db.InitDB()
-	if err != nil {
-		return
-	}
-	redis, err := redis.InitRedis()
-	if err != nil {
-		return
-	}
-	app.DB = db
-	app.Redis = redis
+
+	app.DB = db.Conn
+	app.Redis = redis.Cli
 	return
 }
 
